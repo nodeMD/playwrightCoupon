@@ -1,6 +1,12 @@
 import { expect } from "@playwright/test";
 import { isInViewport } from "../helpers/isInViewport";
 
+/**
+ * Represents a CouponFollow home page.
+ * @constructor
+ * @param {Page} page - playwright page object.
+ * @param {boolean} isMobile - true if the browser is opened in mobile view.
+ */
 export class MainPage {
   constructor(page, isMobile) {
     this.page = page;
@@ -19,6 +25,10 @@ export class MainPage {
     }
   }
 
+  /**
+   * Checks how many topDeals are visible in the browser viewport.
+   * @param {number} expectedNumberOfVisibleTopDeals - number of expected visible top deals on the page.
+   */
   async checkVisibleTopDeals() {
     const topDeals = await this.topDealContainer.count();
     let displayedDeals = 0;
