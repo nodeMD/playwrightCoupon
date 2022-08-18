@@ -1,3 +1,4 @@
+import { test, expect } from "@playwright/test";
 import { MainPage } from "./pages/mainPage";
 
 let mainPage;
