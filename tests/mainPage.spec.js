@@ -23,10 +23,9 @@ test.describe("Main Page tests", () => {
         false,
         `expected to have 3 or 6 or 9 top deals but got ${topDeals}`
       ).toBe(true);
-
-      const expectedNumberOfVisibleTopDeals = 3;
-      await mainPage.checkVisibleTopDeals(expectedNumberOfVisibleTopDeals);
     }
+    const expectedNumberOfVisibleTopDeals = 3;
+    await mainPage.checkVisibleTopDeals(expectedNumberOfVisibleTopDeals);
   });
 
   test("Validate that at least 30 Today’s Trending Coupons are displayed on the main page", async () => {
@@ -36,10 +35,34 @@ test.describe("Main Page tests", () => {
   });
 
   test("Validate that Staff Picks contains unique stores with proper discounts for monetary, percentage or text values", async () => {
+    let storesNames = [];
     const staffPicksCount = await mainPage.staffPickContainer.count();
     expect(staffPicksCount).toBeGreaterThan(0);
 
-    // iterate through staff picks and check if they contain unique stores and proper data
+    for (let index = 0; index < staffPicksCount; index++) {
+      let storeName = await mainPage.staffPickStoreName
+        .nth(index)
+        .textContent();
+
+      storesNames.push(storeName);
+
+      let discountText = await await mainPage.staffPickDiscountText
+        .nth(index)
+        .textContent();
+
+      if (discountText.includes("%")) {
+        let percentageNumber = parseFloat(discountText.match(/\d/g).join(""));
+        await expect(percentageNumber).toBeGreaterThanOrEqual(1);
+        await expect(percentageNumber).toBeLessThanOrEqual(100);
+      } else if (discountText.includes("$")) {
+        let cashValue = parseFloat(discountText.match(/\d/g).join(""));
+        await expect(cashValue).toBeGreaterThan(1);
+      } else {
+        await expect(discountText.length).toBeGreaterThan(3);
+      }
+    }
+    await expect(storesNames.length).toEqual(staffPicksCount);
+    await expect(storesNames.length).toEqual(new Set(storesNames).size);
   });
 
   test("If applicable (there are more than 3 Top Deal coupons) - Validate that the Top Deal swiper is automatically changed every 5 seconds", async () => {
