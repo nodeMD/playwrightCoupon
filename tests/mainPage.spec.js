@@ -24,7 +24,8 @@ test.describe("Main Page tests", () => {
         `expected to have 3 or 6 or 9 top deals but got ${topDeals}`
       ).toBe(true);
 
-      await mainPage.checkVisibleTopDeals();
+      const expectedNumberOfVisibleTopDeals = 3;
+      await mainPage.checkVisibleTopDeals(expectedNumberOfVisibleTopDeals);
     }
   });
 

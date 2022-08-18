@@ -29,7 +29,7 @@ export class MainPage {
    * Checks how many topDeals are visible in the browser viewport.
    * @param {number} expectedNumberOfVisibleTopDeals - number of expected visible top deals on the page.
    */
-  async checkVisibleTopDeals() {
+  async checkVisibleTopDeals(expectedNumberOfVisibleTopDeals) {
     const topDeals = await this.topDealContainer.count();
     let displayedDeals = 0;
     for (let index = 1; index <= topDeals; index++) {
@@ -41,6 +41,6 @@ export class MainPage {
         displayedDeals++;
       }
     }
-    await expect(displayedDeals).toEqual(3);
+    await expect(displayedDeals).toEqual(expectedNumberOfVisibleTopDeals);
   }
 }
