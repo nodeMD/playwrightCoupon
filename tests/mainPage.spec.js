@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import wait from "./helpers/wait";
 import { MainPage } from "./pages/mainPage";
 
 let mainPage;
@@ -69,7 +70,15 @@ test.describe("Main Page tests", () => {
     const topDeals = await mainPage.topDealContainer.count();
     const topDealsDuplicates = await mainPage.topDealDuplicate.count();
     if (topDeals - topDealsDuplicates > 3) {
-      // check if it change after every 5sec
+      const activeTopDealName = await mainPage.topDealActiveName.textContent();
+      wait(4000);
+      const activeTopDealNameAfterFourSec =
+        await mainPage.topDealActiveName.textContent();
+      expect(activeTopDealName).toEqual(activeTopDealNameAfterFourSec);
+      wait(1000);
+      const activeTopDealNameAfterFiveSec =
+        await mainPage.topDealActiveName.textContent();
+      expect(activeTopDealName).not.toEqual(activeTopDealNameAfterFiveSec);
     }
   });
 });
