@@ -24,7 +24,7 @@ test.describe("Main Page tests", () => {
         `expected to have 3 or 6 or 9 top deals but got ${topDeals}`
       ).toBe(true);
 
-      // check if only 3 deals are visible
+      await mainPage.checkVisibleTopDeals();
     }
   });
 
@@ -38,7 +38,7 @@ test.describe("Main Page tests", () => {
     const staffPicksCount = await mainPage.staffPickContainer.count();
     expect(staffPicksCount).toBeGreaterThan(0);
 
-    // iterate through staff picks and check if they contain unique stores and proper data 
+    // iterate through staff picks and check if they contain unique stores and proper data
   });
 
   test("If applicable (there are more than 3 Top Deal coupons) - Validate that the Top Deal swiper is automatically changed every 5 seconds", async () => {

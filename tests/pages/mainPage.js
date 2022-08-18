@@ -1,3 +1,6 @@
+import { expect } from "@playwright/test";
+import { isInViewport } from "../helpers/isInViewport";
+
 export class MainPage {
   constructor(page, isMobile) {
     this.page = page;
@@ -14,5 +17,20 @@ export class MainPage {
     } else {
       this.trendingCouponContainer = page.locator("article.trending-offer");
     }
+  }
+
+  async checkVisibleTopDeals() {
+    const topDeals = await this.topDealContainer.count();
+    let displayedDeals = 0;
+    for (let index = 1; index <= topDeals; index++) {
+      const isVisible = await isInViewport(
+        this.page,
+        `div.swiper-slide:nth-child(${index})`
+      );
+      if (isVisible) {
+        displayedDeals++;
+      }
+    }
+    await expect(displayedDeals).toEqual(3);
   }
 }
