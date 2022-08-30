@@ -1,11 +1,20 @@
 import { test, expect } from "@playwright/test";
-import wait from "./helpers/wait";
+import path from "path";
 import { MainPage } from "./pages/mainPage";
 
 let mainPage;
 
 test.describe("Main Page tests", () => {
-  test.beforeEach(async ({ page, isMobile }) => {
+  test.beforeEach(async ({ context, isMobile }) => {
+    // add sinon
+    await context.addInitScript({
+      path: path.join(__dirname, "..", "./node_modules/sinon/pkg/sinon.js"),
+    });
+    // enable sinon
+    await context.addInitScript(() => {
+      window.__clock = sinon.useFakeTimers();
+    });
+    const page = await context.newPage();
     mainPage = new MainPage(page, isMobile);
     await page.goto("./");
     await page.waitForURL("./");
@@ -19,17 +28,10 @@ test.describe("Main Page tests", () => {
     const topDeals = await mainPage.topDealContainer.count();
     const topDealsDuplicates = await mainPage.topDealDuplicate.count();
     const notDuplicatedTopDeals = topDeals - topDealsDuplicates;
-    if (
-      notDuplicatedTopDeals !== 3 &&
-      notDuplicatedTopDeals !== 6 &&
-      notDuplicatedTopDeals !== 9
-    ) {
-      // "custom" expect to check if the amount of unique topDeals is different than 3 or 6 or 9
-      await expect(
-        false,
-        `expected to have 3 or 6 or 9 top deals but got ${topDeals}`
-      ).toBe(true);
-    }
+    await expect(
+      notDuplicatedTopDeals % 3 == 0 && topDeals <= 9,
+      `expected to have 3 or 6 or 9 top deals but got ${topDeals}`
+    ).toBeTruthy();
     // we are expecting to have only 3 top deals visible
     const expectedNumberOfVisibleTopDeals = 3;
     // check if only three top deals are visible (implementation in ./pages/mainPage)
@@ -73,7 +75,7 @@ test.describe("Main Page tests", () => {
         await expect(cashValue).toBeGreaterThan(1);
       } else {
         // for other discounts texts check if the text contain at least few chars
-        // I would talk with Product Owner to gather more conditions that the text has to fulfill 
+        // I would talk with Product Owner to gather more conditions that the text has to fulfill
         // and than I would add next validations to cover them
         await expect(discountText.length).toBeGreaterThan(3);
       }
@@ -89,20 +91,12 @@ test.describe("Main Page tests", () => {
     const topDealsDuplicates = await mainPage.topDealDuplicate.count();
     // count unique deals and check if there are more than 3
     if (topDeals - topDealsDuplicates > 3) {
-      // I was not able to trigger that behavior of changing the topDeal after 5 seconds
-      // maybe cause I was always getting only 3 unique topDeals
-      // and I guess that it is only triggered when there are 6 or 9 unique topDeals.
-      // If not than there is a bug cause even on mobile view it is not changing after 5sec.
-      // If I would see how it works than I would try to approach it with waitForEvent.
-      // Without seeing it in action I implemented it in a way that
-      // it is checking if the center top deal store name does not changed until 5 seconds passed.
-      // I'm not proud of it cause I do not like explicit waits in the tests code.
       const activeTopDealName = await mainPage.topDealActiveName.textContent();
-      wait(4000);
+      await page.evaluate(() => window.__clock.tick(4000));
       const activeTopDealNameAfterFourSec =
         await mainPage.topDealActiveName.textContent();
       expect(activeTopDealName).toEqual(activeTopDealNameAfterFourSec);
-      wait(1000);
+      await page.evaluate(() => window.__clock.tick(1000));
       const activeTopDealNameAfterFiveSec =
         await mainPage.topDealActiveName.textContent();
       // after five seconds the active top deal store name should be different than previously
